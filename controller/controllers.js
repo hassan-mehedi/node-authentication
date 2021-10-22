@@ -1,5 +1,8 @@
+const { json } = require("express");
+const User = require("../models/User");
+
 const login_get = (req, res) => {
-    res.send("login");
+    res.render("login");
 };
 
 const login_post = (req, res) => {
@@ -7,11 +10,45 @@ const login_post = (req, res) => {
 };
 
 const signup_get = (req, res) => {
-    res.send("signup");
+    console.log(req.body);
+    res.render("signup");
 };
 
-const signup_post = (req, res) => {
-    res.send("Hey in the signup post page");
+const signup_post = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const user = await User.create({
+            email,
+            password,
+        });
+        res.status(201).send(user);
+    } catch (err) {
+        const errorMessage = errorHandler(err);
+        res.status(400).json({ errorMessage });
+    }
+};
+
+// handlers
+
+const errorHandler = (err) => {
+    const errorMessage = {
+        email: "",
+        password: "",
+    };
+
+    if (err.code === 11000) {
+        errorMessage.email = "There is an account with this email";
+        return errorMessage;
+    }
+
+    if (err.message.includes("user validation failed")) {
+        Object.values(err.errors).forEach((error) => {
+            const { path, message } = error.properties;
+            errorMessage[path] = message;
+        });
+    }
+
+    return errorMessage;
 };
 
 module.exports = {
