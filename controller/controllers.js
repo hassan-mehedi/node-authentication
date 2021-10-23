@@ -29,7 +29,7 @@ const signup_post = async (req, res) => {
             httpOnly: true,
             maxAge: expiryTime * 1000,
         });
-        res.status(201).send(user);
+        res.status(201).send({ user: user._id });
     } catch (err) {
         const errorMessage = errorHandler(err);
         res.status(400).json({ errorMessage });
